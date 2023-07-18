@@ -3,10 +3,14 @@
 from __future__ import print_function
 import os
 import sys
-from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer, test as _test
-import subprocess
-from SocketServer import ThreadingMixIn
+if sys.version_info[0] < 3:
+    from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer, test as _test
+    from SocketServer import ThreadingMixIn
+else:
+    from http.server import BaseHTTPRequestHandler, HTTPServer, test as _test
+    from socketserver import ThreadingMixIn
 import argparse
+import subprocess
 
 
 parser = argparse.ArgumentParser(description='Simple Threaded HTTP server to run linux-dash.')
@@ -42,6 +46,8 @@ class MainHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type', contentType)
             self.end_headers()
+            if isinstance(data, str):
+                data = data.encode()
             self.wfile.write(data)
 
         except IOError:
